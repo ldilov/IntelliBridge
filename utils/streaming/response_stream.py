@@ -4,6 +4,8 @@ import traceback
 from multiprocessing import Queue
 from threading import Thread
 
+from kernel.logger.logger import logger
+
 
 def synchronized(function):
     lock = threading.Lock()
@@ -40,7 +42,7 @@ class ResponseStream:
             except ValueError:
                 pass
             except:
-                traceback.print_exc()
+                logger.exception("Exception in response stream")
                 pass
 
             self.q.put(self.sentinel)

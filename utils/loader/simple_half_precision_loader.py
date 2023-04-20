@@ -5,7 +5,8 @@ import torch
 import transformers
 from transformers import AutoModelForCausalLM, AutoModel, AutoTokenizer, LlamaTokenizer
 
-from utils.attention.llama_attention import LlamaAttention
+from kernel.logger.logger import logger
+from utils.attention.attention_modifier import AttentionModifier
 from utils.loader.abstract_loader import AbstractLoader
 
 
@@ -27,9 +28,8 @@ class SimpleFloatHalfPrecisionLoader(AbstractLoader):
         else:
             model = model.cuda()
 
-        # Hijack attention with xformers
         if any((self.xformers, self.sdp_attention)):
-            LlamaAttention(self.xformers, self.sdp_attention).hijack_llama_attention()
+            AttentionModifier(self.xformers, self.sdp_attention).apply_auto(model)
 
         # Loading the tokenizer
         if any((k in self.name.lower() for k in ['gpt4chan', 'gpt-4chan'])) and Path(f"{self.dir}/gpt-j-6B/").exists():
@@ -46,5 +46,5 @@ class SimpleFloatHalfPrecisionLoader(AbstractLoader):
         else:
             tokenizer = AutoTokenizer.from_pretrained(Path(f"{self.dir}/{self.name}/"), trust_remote_code=self.trust_remote_code)
 
-        print(f"Loaded the model in {(time.time()-t0):.2f} seconds.")
+        logger.success(f"Loaded the model in {(time.time()-t0):.2f} seconds.")
         return model, tokenizer

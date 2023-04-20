@@ -14,7 +14,7 @@ class LlamaCppLoader(AbstractLoader):
         from utils.llama.llamacpp_model import LlamaCppModel
 
         model_file = Path(f'{self.dir}/{self.name}')
-        print(f"llama.cpp weights detected: {model_file}\n")
+        logger.warning(f"llama.cpp weights detected: {model_file}\n")
 
         model, tokenizer = LlamaCppModel.from_pretrained(model_file, ResponseStream)
 

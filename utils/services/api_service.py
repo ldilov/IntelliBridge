@@ -1,16 +1,14 @@
-import json
-import os
-
 from utils.services.model_service import ModelService
 from utils.services.text_generation_service import TextGenerationService
 from utils.configurator import Configurator
-from utils.input.input_arguments_parser import ArgumentsParser
+from kernel.arguments_parser import ArgumentsParser
+from kernel.persistence.memory.global_modules_register import register as modules
 
 
 class ApiService(object):
     def __init__(self):
-        self.args_parser = ArgumentsParser()
-        self.args, self.args_defaults = self.args_parser.parse()
+        self.args_parser = modules.get(ArgumentsParser)
+        self.args, self.args_defaults = (self.args_parser.args, self.args_parser.default_args)
 
         configurator = Configurator(self.args.model_dir)
         configurator.load_server_config()

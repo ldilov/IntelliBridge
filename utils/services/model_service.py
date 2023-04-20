@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from kernel.logger.logger import logger
 from utils.pytorch.gc import TorchGC
 
 
@@ -23,17 +24,7 @@ class ModelService(object):
         self.is_llamacpp = "ggml" in Path(f'{self.args.model_dir}/{self.model_name}').name
 
         loader = None
-        if not any([self.args.cpu, self.args.auto_devices, self.args.gpu_memory is not None,
-                    self.args.cpu_memory is not None, self.args.deepspeed, self.is_llamacpp]):
-            from utils.loader.simple_half_precision_loader import SimpleFloatHalfPrecisionLoader
-            loader = SimpleFloatHalfPrecisionLoader(
-                self.model_name,
-                self.args.model_dir,
-                self.args.bf16,
-                self.args.xformers,
-                self.args.sdp_attention
-            )
-        elif self.args.deepspeed:
+        if self.args.deepspeed:
             from utils.loader.deepspeed_loader import DeepSpeedLoader
             loader = DeepSpeedLoader(
                 self.model_name,
@@ -60,8 +51,8 @@ class ModelService(object):
             else:
                 loader = gptq_loader
         else:
-            from utils.loader.nonquantized_loader import NonquantizedLoader
-            loader = NonquantizedLoader(
+            from utils.loader.full_precision_loader import FullPrecisionLoader
+            loader = FullPrecisionLoader(
                 self.model_name,
                 self.args.model_dir,
                 self.args.xformers,
@@ -101,14 +92,14 @@ class ModelService(object):
                 zf.extract('tensor.npy')
                 zf.extract('meta.json')
                 j = json.loads(open('meta.json', 'r').read())
-                print(f"\nLoading the softprompt \"{name}\".")
+                logger.info(f"\nLoading the softprompt \"{name}\".")
                 for field in j:
                     if field != 'name':
                         if type(j[field]) is list:
                             print(f"{field}: {', '.join(j[field])}")
                         else:
                             print(f"{field}: {j[field]}")
-                print()
+
                 tensor = np.load('tensor.npy')
                 Path('tensor.npy').unlink()
                 Path('meta.json').unlink()

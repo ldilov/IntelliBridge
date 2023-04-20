@@ -1,4 +1,4 @@
-import traceback
+from kernel.logger.logger import logger
 
 
 class LlamaCppGenerator(object):
@@ -11,5 +11,5 @@ class LlamaCppGenerator(object):
             for reply in gen_class.model.generate_with_streaming(context=question, **generate_params):
                 output = question + reply
                 yield gen_class.formatted_outputs(reply, gen_class.args.model)
-        except Exception:
-            traceback.print_exc()
+        except Exception as ex:
+            logger.error("Error in LlamaCppGenerator.generate: %s")

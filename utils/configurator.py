@@ -4,6 +4,8 @@ from pathlib import Path
 
 import yaml
 
+from kernel.logger.logger import logger
+
 
 class Configurator(object):
     def __init__(self, model_dir):
@@ -40,6 +42,6 @@ class Configurator(object):
             if pth.exists():
                 self.server_config = json.loads(open(pth, 'r', encoding="utf-8").read())
             else:
-                print(f"Server config file not found: {server_json_path}")
+                logger.error(f"Server config file not found: {server_json_path}")
                 self.server_config = {}
 

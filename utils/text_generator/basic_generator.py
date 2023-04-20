@@ -4,6 +4,7 @@ import traceback
 import torch
 import transformers
 
+from kernel.logger.logger import logger
 from utils.stopping_criteria.sentinel_token_stopping_criteria import SentinelTokenStoppingCriteria
 from utils.stopping_criteria.special_tokens_stopping_criteria import SpecialTokensStoppingCriteria
 from utils.streaming.response_stream import ResponseStream
@@ -75,4 +76,4 @@ class BasicGenerator(object):
                     yield gen_class.formatted_outputs(reply, gen_class.args.model)
 
         except Exception:
-            traceback.print_exc()
+            logger.exception("Error in generating text response!")

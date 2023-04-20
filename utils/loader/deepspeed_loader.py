@@ -8,7 +8,8 @@ import transformers
 from transformers import AutoModel, AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer
 from transformers.deepspeed import is_deepspeed_zero3_enabled, HfDeepSpeedConfig
 
-from utils.attention.llama_attention import LlamaAttention
+from kernel.logger.logger import logger
+from utils.attention.attention_modifier import AttentionModifier
 from utils.loader.abstract_loader import AbstractLoader
 
 
@@ -36,11 +37,11 @@ class DeepSpeedLoader(AbstractLoader):
         model = self.loader_class.from_pretrained(Path(f"{self.dir}/{self.name}"), torch_dtype=torch.bfloat16 if self.isBf16 else torch.float16)
         model = deepspeed.initialize(model=model, config_params=self.ds_config, model_parameters=None, optimizer=None, lr_scheduler=None)[0]
         model.module.eval()  # Inference
-        print(f"DeepSpeed ZeRO-3 is enabled: {is_deepspeed_zero3_enabled()}")
+        logger.warning(f"DeepSpeed ZeRO-3 is enabled: {is_deepspeed_zero3_enabled()}")
 
-        # Hijack attention with xformers
         if any((self.xformers, self.sdp_attention)):
-            LlamaAttention(self.xformers, self.sdp_attention).hijack_llama_attention()
+            attn_modifier = AttentionModifier(self.xformers, self.sdp_attention)
+            attn_modifier.apply_auto(model)
 
         # Loading the tokenizer
         if any((k in self.name.lower() for k in ['gpt4chan', 'gpt-4chan'])) and Path(f"{self.dir}/gpt-j-6B/").exists():
@@ -58,7 +59,7 @@ class DeepSpeedLoader(AbstractLoader):
         else:
             tokenizer = AutoTokenizer.from_pretrained(Path(f"{self.dir}/{self.name}/"), trust_remote_code=self.trust_remote_code)
 
-        print(f"Loaded the model in {(time.time()-t0):.2f} seconds.")
+        logger.success(f"Loaded the model in {(time.time()-t0):.2f} seconds.")
         return model, tokenizer
 
     def _generate_ds_config(self, ds_bf16, train_batch_size, nvme_offload_dir):
