@@ -1,0 +1,23 @@
+{
+  "max_new_tokens": 200,
+  "max_new_tokens_min": 5,
+  "max_new_tokens_max": 2000,
+  "seed": -1,
+  "custom_stopping_strings": "",
+  "stop_at_newline": false,
+  "add_bos_token": true,
+  "ban_eos_token": true,
+  "do_sample": true,
+  "min_length": 15,
+  "num_beams": 1,
+  "no_repeat_ngram_size": 1,
+  "early_stopping": false,
+  "temperature": 1.0,
+  "top_p": 0.70,
+  "top_k": 20,
+  "typical_p": 1,
+  "penalty_alpha": 0,
+  "length_penalty": 1,
+  "encoder_repetition_penalty": 1.0,
+  "repetition_penalty": 1.00
+}

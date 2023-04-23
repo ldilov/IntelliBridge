@@ -21,7 +21,7 @@ class SimpleFloatHalfPrecisionLoader(AbstractLoader):
 
     def load(self):
         t0 = time.time()
-        model = self.loader_class.from_pretrained(Path(f"{self.dir}/{self.name}"), low_cpu_mem_usage=True, torch_dtype=torch.bfloat16 if self.bf16 else torch.float16, trust_remote_code=self.trust_remote_code)
+        model = self.loader_class.from_pretrained(Path(f"{self.dir}/{self.name}"))
         if torch.has_mps:
             device = torch.device('mps')
             model = model.to(device)

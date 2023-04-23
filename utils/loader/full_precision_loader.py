@@ -75,7 +75,7 @@ class FullPrecisionLoader(AbstractLoader):
 
         checkpoint = Path(f'{self.dir}/{self.name}')
 
-        model = self.loader_class.from_pretrained(checkpoint, **params)
+        model = self.loader_class.from_pretrained(checkpoint)
 
         if any((self.xformers, self.sdp)):
             AttentionModifier(self.xformers, self.sdp).apply_auto(model)

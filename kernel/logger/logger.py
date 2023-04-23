@@ -7,9 +7,9 @@ from loguru import logger
 
 from kernel.persistence.storage.file_manager import FileManager
 
-logging.basicConfig(level=logging.CRITICAL)
-logging.getLogger("transformers").setLevel(logging.CRITICAL)
-logging.getLogger("safetensors").setLevel(logging.CRITICAL)
+logging.basicConfig(level=logging.ERROR)
+logging.getLogger("transformers").setLevel(logging.ERROR)
+logging.getLogger("safetensors").setLevel(logging.ERROR)
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
 transformers.logging.disable_default_handler()

@@ -16,7 +16,7 @@ class LlamaCppModel:
         self.pad_token_id = None
 
     @classmethod
-    def from_pretrained(cls, path, response_stream_cls: ResponseStream, n_threads=None):
+    def from_pretrained(cls, path, n_threads=None):
         result = cls()
 
         params = {
@@ -30,7 +30,6 @@ class LlamaCppModel:
 
         result.model = Llama(**params)
         result.model.set_cache(LlamaCache)
-        result.response_stream_cls = response_stream_cls
 
         result.eos_token_id = 2
         result.bos_token_id = 1
@@ -50,10 +49,10 @@ class LlamaCppModel:
     def decode(self, *args, **kwargs):
         return self._decode_inner(args[0])
 
-    def generate(self, context="", token_count=20, temperature=1, top_p=1, top_k=50, repetition_penalty=1, callback=None):
-        if type(context) is str:
-            context = context.encode()
-        tokens = self.model.tokenize(context)
+    def generate(self, input="", token_count=20, temperature=1, top_p=1, top_k=50, repetition_penalty=1, callback=None):
+        if type(input) is str:
+            input = input.encode()
+        tokens = self.model.tokenize(input)
 
         if type(top_p) is float:
             top_p = int(top_p * 100)

@@ -34,7 +34,7 @@ class DeepSpeedLoader(AbstractLoader):
     def load(self):
         t0 = time.time()
 
-        model = self.loader_class.from_pretrained(Path(f"{self.dir}/{self.name}"), torch_dtype=torch.bfloat16 if self.isBf16 else torch.float16)
+        model = self.loader_class.from_pretrained(Path(f"{self.dir}/{self.name}"))
         model = deepspeed.initialize(model=model, config_params=self.ds_config, model_parameters=None, optimizer=None, lr_scheduler=None)[0]
         model.module.eval()  # Inference
         logger.warning(f"DeepSpeed ZeRO-3 is enabled: {is_deepspeed_zero3_enabled()}")

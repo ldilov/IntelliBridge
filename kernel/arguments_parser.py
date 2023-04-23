@@ -37,7 +37,7 @@ class ArgumentsParser(object):
         self.parser.add_argument('--no-cache', action='store_true', help='Set use_cache to False while generating text. This reduces the VRAM usage a bit at a performance cost.')
         self.parser.add_argument('--xformers', action='store_true', help="Use xformer's memory efficient attention. This should increase your tokens/s.")
         self.parser.add_argument('--sdp-attention', action='store_true', help="Use torch 2.0's sdp attention.")
-        self.parser.add_argument('--use-accelerate', action='store_true', help="Use accelerate.")
+        self.parser.add_argument('--use-accelerate', action='store_true', default=False, help="Use accelerate.")
 
 
         # GPTQ

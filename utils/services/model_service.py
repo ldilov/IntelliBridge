@@ -7,6 +7,7 @@ import numpy as np
 import torch
 
 from kernel.logger.logger import logger
+from kernel.persistence.infra.models.abstract_model import AbstractModel
 from utils.pytorch.gc import TorchGC
 
 
@@ -43,7 +44,7 @@ class ModelService(object):
 
         elif self.args.wbits > 0:
             from utils.loader.gptq_loader import GptQLoader
-            gptq_loader = GptQLoader(self.args)
+            gptq_loader = GptQLoader()
 
             if self.args.monkey_patch:
                 from utils.loader.loader_4bit_helper import load_model_llama_4bit
@@ -67,10 +68,10 @@ class ModelService(object):
 
         self.loader = loader
 
-    def load_model(self):
-        self.model_ref, self.tokenizer_ref = self.loader.load()
+    def load_model(self) -> AbstractModel:
+        model: AbstractModel = self.loader.load()
 
-        return self.model_ref, self.tokenizer_ref
+        return model
 
     def unload_model(self):
         del self.model_ref
@@ -79,37 +80,6 @@ class ModelService(object):
         self.model_ref = self.tokenizer_ref = None
         self.gc.clear_torch_cache()
 
-    def reload_model(self):
+    def reload_model(self) -> AbstractModel:
         self.unload_model()
-        self.model_ref, self.tokenizer_ref = self.load_model()
-
-    def load_soft_prompt(self, name):
-        if name == 'None':
-            self.soft_prompt = False
-            self.soft_prompt_tensor = None
-        else:
-            with zipfile.ZipFile(Path(f'softprompts/{name}.zip')) as zf:
-                zf.extract('tensor.npy')
-                zf.extract('meta.json')
-                j = json.loads(open('meta.json', 'r').read())
-                logger.info(f"\nLoading the softprompt \"{name}\".")
-                for field in j:
-                    if field != 'name':
-                        if type(j[field]) is list:
-                            print(f"{field}: {', '.join(j[field])}")
-                        else:
-                            print(f"{field}: {j[field]}")
-
-                tensor = np.load('tensor.npy')
-                Path('tensor.npy').unlink()
-                Path('meta.json').unlink()
-            tensor = torch.Tensor(tensor).to(device=self.model_ref.device, dtype=self.model_ref.dtype)
-            tensor = torch.reshape(tensor, (1, tensor.shape[0], tensor.shape[1]))
-
-            self.soft_prompt = True
-            self.soft_prompt_tensor = tensor
-
-        return name
-
-    def get_soft_prompt(self):
-        return self.soft_prompt, self.soft_prompt_tensor
+        return self.load_model()
