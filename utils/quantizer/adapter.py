@@ -10,10 +10,10 @@ from kernel.persistence.memory.global_registry import registry as memory
 from kernel.persistence.performance.intelli_flow_accelerator import IntelliFlowAccelerator
 from utils.third_party.AutoGPTQ.auto_gptq import BaseQuantizeConfig
 from utils.third_party.AutoGPTQ.auto_gptq.modeling import BaseGPTQForCausalLM, GPTNeoXGPTQForCausalLM, \
-    GPTJGPTQForCausalLM, LlamaGPTQForCausalLM, GPTQ_CAUSAL_LM_MODEL_MAP, OPTGPTQForCausalLM, BloomGPTQForCausalLM
+    GPTJGPTQForCausalLM, LlamaGPTQForCausalLM, OPTGPTQForCausalLM, BloomGPTQForCausalLM
+from utils.third_party.AutoGPTQ.auto_gptq.modeling.auto import GPTQ_CAUSAL_LM_MODEL_MAP
 from utils.third_party.AutoGPTQ.auto_gptq.modeling._const import SUPPORTED_MODELS
-from utils.third_party.AutoGPTQ.auto_gptq.modeling._utils import find_layers
-from utils.third_party.AutoGPTQ.auto_gptq.quantization import make_quant
+from utils.third_party.AutoGPTQ.auto_gptq.modeling._utils import find_layers, make_quant
 from os.path import join
 from pathlib import Path
 

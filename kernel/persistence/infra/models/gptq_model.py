@@ -9,8 +9,9 @@ from kernel.persistence.memory.global_modules_registry import registry as memory
 from kernel.persistence.infra.models.transformer_model import TransformerModel
 from kernel.persistence.storage.file_manager import FileManager
 from utils.quantizer.adapter import AdapterGPTQForCausalLm
+from utils.streaming.stream_generator import StreamGenerator
 from utils.third_party.AutoGPTQ.auto_gptq import BaseQuantizeConfig
-from utils.third_party.AutoGPTQ.auto_gptq.modeling_auto import AutoGPTQForCausalLM
+from utils.third_party.AutoGPTQ.auto_gptq.modeling.auto import AutoGPTQForCausalLM
 
 
 class GptqModel(TransformerModel):
@@ -53,7 +54,7 @@ class GptqModel(TransformerModel):
                 trust_remote_code=True
             )
 
-        gptq_model.stream_model = StreamModel(gptq_model.model, gptq_model.tokenizer)
+        gptq_model._stream_generator = StreamGenerator(gptq_model.model, gptq_model.tokenizer, gptq_model._generation_config)
 
         return gptq_model
 
