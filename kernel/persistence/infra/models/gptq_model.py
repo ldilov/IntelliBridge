@@ -1,17 +1,17 @@
 import re
-from pathlib import Path
 
-from basaran.model import StreamModel
 from transformers import AutoTokenizer, PreTrainedModel, PreTrainedTokenizer
 
-from kernel.persistence.infra.model_store import ModelStore
 from kernel.persistence.memory.global_modules_registry import registry as memory
 from kernel.persistence.infra.models.transformer_model import TransformerModel
 from kernel.persistence.storage.file_manager import FileManager
-from utils.quantizer.adapter import AdapterGPTQForCausalLm
-from utils.streaming.stream_generator import StreamGenerator
-from utils.third_party.AutoGPTQ.auto_gptq import BaseQuantizeConfig
-from utils.third_party.AutoGPTQ.auto_gptq.modeling.auto import AutoGPTQForCausalLM
+from external.adapters.autogptq_adapter import AdapterGPTQForCausalLm
+from src.data_generation.streaming.common.samplers.hybrid import HybridTokenSampler
+from src.data_generation.streaming.stream_generator import StreamGenerator
+from external.plugins.AutoGPTQ.auto_gptq import BaseQuantizeConfig
+from external.plugins.AutoGPTQ.auto_gptq.modeling.auto import AutoGPTQForCausalLM
+from src.data_processing.pipelines.abstract_pipeline import AbstractPipeline
+from src.data_processing.pipelines.output_pipeline import OutputLogitsPipeline
 
 
 class GptqModel(TransformerModel):
@@ -54,7 +54,9 @@ class GptqModel(TransformerModel):
                 trust_remote_code=True
             )
 
-        gptq_model._stream_generator = StreamGenerator(gptq_model.model, gptq_model.tokenizer, gptq_model._generation_config)
+        gptq_model._sampler = HybridTokenSampler(gptq_model.tokenizer, gptq_model._generation_config)
+        gptq_model._logits_pipe: AbstractPipeline = OutputLogitsPipeline(gptq_model._generation_config)
+        gptq_model._stream_generator = StreamGenerator(gptq_model.model, gptq_model.tokenizer, gptq_model._sampler, gptq_model._generation_config, gptq_model._logits_pipe)
 
         return gptq_model
 

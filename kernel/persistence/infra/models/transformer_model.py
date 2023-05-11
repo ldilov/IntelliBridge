@@ -1,27 +1,29 @@
 import json
-import os
-from pathlib import Path
 from typing import Optional
 
-import torch
 import transformers
-from transformers import PreTrainedModel, PreTrainedTokenizer, LlamaModel, LlamaTokenizer, LlamaForCausalLM, \
-    GenerationConfig, LogitsProcessorList, RepetitionPenaltyLogitsProcessor
-from transformers.utils import PaddingStrategy
+from transformers import PreTrainedModel, PreTrainedTokenizer, GenerationConfig
 
-from kernel.persistence.infra.enums.model_type import ModelType
 from kernel.persistence.infra.model_store import ModelStore
 from kernel.persistence.infra.models.abstract_model import AbstractModel
-from basaran.model import StreamModel
 
 from kernel.persistence.storage.file_manager import FileManager
-from utils.stopping_criteria.sentinel_token_stopping_criteria import SentinelTokenStoppingCriteria
+from src.data_processing.pipelines.abstract_pipeline import AbstractPipeline
+from src.data_processing.pipelines.output_pipeline import OutputLogitsPipeline
+from src.data_generation.stopping_criteria.sentinel_token_stopping_criteria import SentinelTokenStoppingCriteria
+from src.data_generation.streaming.stream_generator import StreamGenerator
+from src.data_generation.streaming.common.samplers.hybrid import HybridTokenSampler
 
 
 class TransformerModel(AbstractModel):
 
     def __init__(self, model: Optional[PreTrainedModel], tokenizer: Optional[PreTrainedTokenizer], index_dict: dict[str,str]):
         super().__init__(model, tokenizer, index_dict)
+
+        self._sampler = HybridTokenSampler(self.tokenizer, self._generation_config)
+        self._logits_pipe: AbstractPipeline = OutputLogitsPipeline(self._generation_config)
+        args = (self._model, self._tokenizer, self._sampler, self._generation_config, self._logits_pipe)
+        self._stream_generator: StreamGenerator = StreamGenerator(*args)
 
     @classmethod
     def from_pretrained(cls, name, metadata_only=False, **kwargs):
@@ -56,13 +58,6 @@ class TransformerModel(AbstractModel):
             stopping_criteria_list.append(SentinelTokenStoppingCriteria(sentinel_token_ids=sentinel_token_ids, starting_idx=len(encoded)))
             break
 
-        logits_processor = LogitsProcessorList([
-            RepetitionPenaltyLogitsProcessor(penalty=1.2)
-        ])
+        for chunk in self._stream_generator(input_text):
+            print(chunk, end='')
 
-
-        test = self.model.generate(input_ids=encoded, attention_mask=attn_mask, do_sample=True, stopping_criteria=stopping_criteria_list, logits_processor=logits_processor, generation_config=gen_config, eos_token_id=self.tokenizer.eos_token_id)
-        a = self.tokenizer.decode(test[0], skip_special_tokens=True)
-
-        for chunk in self.stream_model(input_text):
-            print(chunk)

@@ -1,6 +1,5 @@
 import importlib.util
 import sys
-import utils
 from typing import Any
 from kernel.logger.logger import logger
 
@@ -10,7 +9,7 @@ class Plugins:
         self.plugins = {}
         self.repo = {
             "AutoGPTQ": {
-                "path": "utils.third_party.AutoGPTQ.auto_gptq.modeling_auto",
+                "path": "external.plugins.AutoGPTQ.auto_gptq.modeling",
                 "author": "PanQiWei"
             }
         }

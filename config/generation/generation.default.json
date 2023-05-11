@@ -13,11 +13,21 @@
   "no_repeat_ngram_size": 1,
   "early_stopping": false,
   "temperature": 1.0,
-  "top_p": 0.70,
   "top_k": 20,
   "typical_p": 1,
   "penalty_alpha": 0,
   "length_penalty": 1,
   "encoder_repetition_penalty": 1.0,
-  "repetition_penalty": 1.00
+  "repetition_penalty": 1.00,
+  "min_top_p": 0.3,
+  "max_top_p": 0.9,
+  "top_p_transition_length": 5,
+  "top_p_scale": 1.0,
+  "min_temperature": 1.0,
+  "max_temperature":  1.5,
+  "temperature_transition_length": 50,
+  "topic_bias_keywords": null,
+  "topic_bias_weight": 0.0,
+  "creative_boost_weight": 0.0,
+  "rare_token_ids": null
 }

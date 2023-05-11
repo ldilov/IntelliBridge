@@ -5,11 +5,10 @@ from pathlib import Path
 
 from transformers import AutoModel, AutoTokenizer
 
-from kernel.persistence.infra.models.abstract_model import AbstractModel
 from kernel.persistence.memory.global_modules_registry import registry
 from kernel.persistence.storage.file_manager import FileManager
 from kernel.logger.logger import logger
-from utils.hub.abstract_hub import AbstractHub
+from src.hub.abstract_hub import AbstractHub
 
 
 class ModelStore:
@@ -17,7 +16,7 @@ class ModelStore:
         self.file_manager: FileManager = registry.get(FileManager)
         self.base_path: Path = Path(os.getcwd()) / 'resources' / 'models'
 
-    def store(self, hub: AbstractHub, repo_or_name: str, model_cls: AbstractModel):
+    def store(self, hub: AbstractHub, repo_or_name: str, model_cls):
         model_path: Path = self._init_directory(repo_or_name)
         self._download(hub, model_path, repo_or_name)
         self._write_metadata(model_path, model_cls)
@@ -69,13 +68,13 @@ class ModelStore:
         return metadata
 
     def load_generation_config(self, model_path: Path):
-        return self.load_config(model_path.name, "generation")
+        return self.load_config(model_path.name, "generation_config")
 
     def _write_generation_config(self, model_path: Path, config_version: str = "default"):
         model_name = model_path.name
         config_src = Path(os.getcwd()) / "config" / "generation" / f"generation.{config_version}.json"
         config_src_dict = json.loads(self.file_manager.read_file(str(config_src)), encoding="utf-8")
-        self.save_config(model_name, "generation", config_src_dict)
+        self.save_config(model_name, "generation_config", config_src_dict)
 
     def _write_metadata(self, model_path, model_cls):
         files, dirs = self.file_manager.list_dir(str(model_path))
